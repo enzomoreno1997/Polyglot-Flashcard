@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Polyglot Flashcard Rush</title>
+<style>
+:root{--bg:#f6f5f1;--fg:#1d1d1b;--card:#fff;--ac:#2f6fed;--mut:#6b6b66;--ok:#1a8a4a;--bad:#c93a3a;--bd:#e2e0d8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--fg:#eeede8;--card:#222220;--ac:#6b9bff;--mut:#9a9a93;--ok:#4cc782;--bad:#ff7a7a;--bd:#33332f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161615;--fg:#eeede8;--card:#222220;--ac:#6b9bff;--mut:#9a9a93;--ok:#4cc782;--bad:#ff7a7a;--bd:#33332f;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0}h2{font-size:18px;margin:12px 0}small,.mut{color:var(--mut);font-size:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:10px 0}
+.big{font-size:30px;font-weight:600;margin:8px 0}
+button,select,input{font:inherit;color:var(--fg);width:100%;box-sizing:border-box;padding:12px;margin:5px 0;border-radius:10px;border:1px solid var(--bd);background:var(--card)}
+button{background:var(--ac);color:#fff;border:0;cursor:pointer}button.ghost{background:transparent;color:var(--ac);border:1px solid var(--bd)}
+button:disabled{opacity:.5}.menu button{text-align:left}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.you{background:color-mix(in srgb,var(--ac) 12%,transparent);padding:6px 8px;border-radius:8px}
+.bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.row{display:flex;gap:12px;justify-content:space-between}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const D={
+ja:{n:"Japanese",c:{
+Basics:`こんにちは|Konnichiwa|Hello / Good afternoon
+ありがとう|Arigatou|Thank you
+さようなら|Sayounara|Goodbye
+水|Mizu|Water
+猫|Neko|Cat`,
+Greetings:`おはよう|Ohayou|Good morning
+こんばんは|Konbanwa|Good evening
+おやすみなさい|Oyasuminasai|Good night
+はじめまして|Hajimemashite|Nice to meet you
+お元気ですか|Ogenki desu ka|How are you?
+すみません|Sumimasen|Excuse me / Sorry`,
+"Daily Routine":`起きる|Okiru|Wake up
+歯を磨く|Ha o migaku|Brush teeth
+朝ごはんを食べる|Asagohan o taberu|Eat breakfast
+仕事に行く|Shigoto ni iku|Go to work
+昼ごはん|Hirugohan|Lunch
+勉強する|Benkyou suru|Study
+家に帰る|Ie ni kaeru|Go home
+晩ごはんを作る|Bangohan o tsukuru|Cook dinner
+シャワーを浴びる|Shawaa o abiru|Take a shower
+寝る|Neru|Go to sleep`,
+Survival:`コーヒー|Koohii|Coffee
+お願いします|Onegaishimasu|Please
+いくらですか|Ikura desu ka|How much is it?
+駅はどこですか|Eki wa doko desu ka|Where is the station?
+英語を話せますか|Eigo o hanasemasu ka|Do you speak English?
+わかりません|Wakarimasen|I don’t understand`},
+d:{"At a café":`A|いらっしゃいませ|Irasshaimase|Welcome!
+B|コーヒーをお願いします|Koohii o onegaishimasu|Coffee, please.
+A|以上ですか|Ijou desu ka|Is that all?
+B|はい、いくらですか|Hai, ikura desu ka|Yes. How much is it?`,
+"Meeting someone":`A|はじめまして|Hajimemashite|Nice to meet you.
+B|はじめまして、私はアレックスです|Hajimemashite, watashi wa Arekkusu desu|Nice to meet you, I’m Alex.
+A|お元気ですか|Ogenki desu ka|How are you?
+B|元気です、ありがとう|Genki desu, arigatou|I’m fine, thank you.`}},
+ru:{n:"Russian",c:{
+Basics:`Здравствуйте|Zdravstvuyte|Hello
+Спасибо|Spasibo|Thank you
+До свидания|Do svidaniya|Goodbye
+Вода|Voda|Water
+Кот|Kot|Cat`,
+Greetings:`Доброе утро|Dobroye utro|Good morning
+Добрый вечер|Dobryy vecher|Good evening
+Спокойной ночи|Spokoynoy nochi|Good night
+Приятно познакомиться|Priyatno poznakomit’sya|Nice to meet you
+Как дела?|Kak dela?|How are you?
+Извините|Izvinite|Excuse me / Sorry`,
+"Daily Routine":`Просыпаться|Prosypat’sya|Wake up
+Чистить зубы|Chistit’ zuby|Brush teeth
+Завтракать|Zavtrakat’|Eat breakfast
+Идти на работу|Idti na rabotu|Go to work
+Обедать|Obedat’|Eat lunch
+Учиться|Uchit’sya|Study
+Идти домой|Idti domoy|Go home
+Готовить ужин|Gotovit’ uzhin|Cook dinner
+Принимать душ|Prinimat’ dush|Take a shower
+Спать|Spat’|Sleep`,
+Survival:`Кофе|Kofe|Coffee
+Пожалуйста|Pozhaluysta|Please
+Сколько это стоит?|Skol’ko eto stoit?|How much is it?
+Где вокзал?|Gde vokzal?|Where is the station?
+Я не понимаю|Ya ne ponimayu|I don’t understand
+Повторите, пожалуйста|Povtorite, pozhaluysta|Repeat, please`},
+d:{"At a café":`A|Здравствуйте! Что будете заказывать?|Zdravstvuyte! Chto budete zakazyvat’?|Hello! What will you order?
+B|Кофе, пожалуйста|Kofe, pozhaluysta|Coffee, please.
+A|Что-нибудь ещё?|Chto-nibud’ yeshchyo?|Anything else?
+B|Нет, спасибо. Сколько это стоит?|Net, spasibo. Skol’ko eto stoit?|No, thanks. How much is it?`,
+"Meeting someone":`A|Приятно познакомиться|Priyatno poznakomit’sya|Nice to meet you.
+B|Мне тоже. Меня зовут Алекс|Mne tozhe. Menya zovut Aleks|Me too. My name is Alex.
+A|Как дела?|Kak dela?|How are you?
+B|Хорошо, спасибо|Khorosho, spasibo|Fine, thank you.`}},
+es:{n:"Spanish",c:{
+Basics:`Hola|OH-la|Hello
+Gracias|GRAH-syas|Thank you
+Adiós|ah-DYOHS|Goodbye
+Agua|AH-gwa|Water
+Gato|GAH-to|Cat`,
+Greetings:`Buenos días|BWEH-nos DEE-as|Good morning
+Buenas noches|BWEH-nas NOH-ches|Good evening / Good night
+Mucho gusto|MOO-cho GOOS-to|Nice to meet you
+¿Cómo estás?|KOH-mo es-TAHS|How are you?
+Perdón|per-DOHN|Excuse me / Sorry
+De nada|deh NAH-da|You’re welcome`,
+"Daily Routine":`Despertarse|des-per-TAR-seh|Wake up
+Cepillarse los dientes|seh-pee-YAR-seh los DYEN-tes|Brush teeth
+Desayunar|deh-sah-yoo-NAR|Eat breakfast
+Ir al trabajo|eer al trah-BAH-ho|Go to work
+Almorzar|al-mor-SAR|Eat lunch
+Estudiar|es-too-DYAR|Study
+Volver a casa|bol-BER ah KAH-sa|Go home
+Cocinar la cena|ko-see-NAR la SEH-na|Cook dinner
+Ducharse|doo-CHAR-seh|Take a shower
+Dormir|dor-MEER|Sleep`,
+Survival:`Café|kah-FEH|Coffee
+Por favor|por fah-VOR|Please
+¿Cuánto cuesta?|KWAN-to KWES-ta|How much is it?
+¿Dónde está la estación?|DON-deh es-TAH la es-ta-SYON|Where is the station?
+¿Hablas inglés?|AH-blas een-GLES|Do you speak English?
+No entiendo|no en-TYEN-do|I don’t understand`},
+d:{"At a café":`A|Hola, ¿qué desea?|OH-la, keh deh-SEH-a|Hello, what would you like?
+B|Un café, por favor|oon kah-FEH, por fah-VOR|A coffee, please.
+A|¿Algo más?|AL-go mahs|Anything else?
+B|No, gracias. ¿Cuánto cuesta?|no, GRAH-syas. KWAN-to KWES-ta|No, thanks. How much is it?`,
+"Meeting someone":`A|Mucho gusto|MOO-cho GOOS-to|Nice to meet you.
+B|Igualmente. Me llamo Alex|ee-gwal-MEN-teh. meh YAH-mo Alex|Likewise. My name is Alex.
+A|¿Cómo estás?|KOH-mo es-TAHS|How are you?
+B|Estoy bien, gracias|es-TOY byen, GRAH-syas|I’m fine, thanks.`}}};
+
+const $=s=>document.querySelector(s),LK=Object.keys(D),TIMES=["06:30","06:45","07:15","08:30","12:30","15:00","18:00","19:00","21:30","22:30"],INT=[0,0,1,3,7,14];
+const P0={cards:{},xp:0,streak:0,best:0,last:"",today:{d:"",n:0}};
+let S;try{S={...P0,...JSON.parse(localStorage.getItem("pfr")||"{}")}}catch(e){S={...P0}}
+const save=()=>{try{localStorage.setItem("pfr",JSON.stringify(S))}catch(e){}};
+const day=(o=0)=>{const d=new Date();d.setDate(d.getDate()+o);return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const view=h=>{$("#app").innerHTML=h;window.scrollTo(0,0)};
+const back=()=>`<button class="ghost" onclick="home()">← Menu</button>`;
+const cards=(l,cat)=>{const o=[];for(const k of LK){if(l!=="all"&&l!==k)continue;for(const[c,t]of Object.entries(D[k].c)){if(cat&&cat!=="all"&&c!==cat)continue;t.split("\n").forEach(r=>{const[w,p,m]=r.split("|");o.push({id:k+c+w,l:k,c,w,p,m})})}}return o};
+const norm=s=>s.toLowerCase().normalize("NFKD").replace(/\p{M}/gu,"").replace(/[^\p{L}\p{N}\s]/gu,"").replace(/\s+/g," ").trim();
+const lev=(a,b)=>{const m=[...Array(a.length+1)].map((_,i)=>[i,...Array(b.length).fill(0)]);for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return m[a.length][b.length]};
+const ok=(a,e,t=.85)=>{a=norm(a);return !!a&&e.split("/").some(o=>{o=norm(o);return o&&(a===o||1-lev(a,o)/Math.max(a.length,o.length)>=t)})};
+const rec=(id,g)=>{const e=S.cards[id]||{b:1,s:0,c:0};e.s++;if(g){e.c++;e.b=Math.min(5,e.b+1);S.xp+=10}else{e.b=1;S.xp+=2}e.due=day(INT[e.b]);S.cards[id]=e;const t=day();if(S.today.d!==t)S.today={d:t,n:0};S.today.n++;if(S.last!==t){S.streak=S.last===day(-1)?S.streak+1:1;S.best=Math.max(S.best,S.streak);S.last=t}save()};
+const LC={ja:"ja-JP",ru:"ru-RU",es:"es-ES"};let AUTO=true;
+const say=(t,l)=>{try{const u=new SpeechSynthesisUtterance(t);u.lang=LC[l];u.rate=.85;const v=speechSynthesis.getVoices().find(x=>x.lang.replace("_","-").startsWith(LC[l].slice(0,2)));if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}};
+const sp=(t,l)=>`<button class="ghost sp" style="width:auto;padding:4px 12px;margin:0 4px" data-t="${t}" data-l="${l}" onclick="say(this.dataset.t,this.dataset.l)">🔊</button>`;
+function mic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return alert("Speech recognition isn’t supported in this browser.");const c=Q.list[Q.i],r=new SR();r.lang=Q.mode==="r"?LC[c.l]:"en-US";r.onresult=e=>{$("#in").value=e.results[0][0].transcript;sub()};try{r.start()}catch(e){}}
+const langBtns=f=>LK.map(k=>`<button onclick="${f}('${k}')">${D[k].n}</button>`).join("");
+
+function home(){
+ const all=cards("all"),n=[...day().split("-")].join("")%all.length,w=all[n],g=S.today.d===day()?S.today.n:0;
+ view(`<h1>🌍 Polyglot Flashcard Rush</h1><div class="row"><small>🔥 Streak ${S.streak}</small><small>⭐ ${S.xp} XP</small><small>🎯 ${Math.min(g,10)}/10 today</small></div>
+ <div class="card"><small>Word of the day · ${D[w.l].n}</small><div class="big">${w.w} ${sp(w.w,w.l)}</div><div class="mut">${w.p} = ${w.m}</div></div>
+ <div class="menu"><button onclick="mission()">🎯 Daily mission</button><button onclick="study('f')">📖 Foreign → English</button><button onclick="study('r')">✍️ English → Foreign</button><button onclick="study('c')">🔘 Multiple choice</button><button onclick="talk()">💬 Conversation practice</button><button onclick="routine()">🕒 Daily routine</button><button onclick="stats()">📊 Stats</button><button class="ghost" onclick="AUTO=!AUTO;home()">${AUTO?"🔊 Voice auto-play: on":"🔇 Voice auto-play: off"}</button></div>`)}
+
+let Q;
+function run(mode,list,title){Q={mode,list:shuf(list),i:0,s:0,title};ask()}
+function ask(){
+ if(Q.i>=Q.list.length)return end();
+ const c=Q.list[Q.i],m=Q.mode,inp=`<input id="in" autocomplete="off" autocapitalize="off" placeholder="Type your answer"><button onclick="sub()">Check</button><button class="ghost" onclick="mic()">🎤 Speak answer</button>`;let b;
+ if(m==="c"){Q.o=shuf([c.m,...shuf(cards("all").filter(x=>x.m!==c.m)).slice(0,3).map(x=>x.m)]);b=`<div class="big">${c.w} ${sp(c.w,c.l)}</div><div class="mut">${c.p}</div>`+Q.o.map((o,k)=>`<button class="ghost" onclick="pick(${k})">${o}</button>`).join("")}
+ else if(m==="r")b=`<div class="big">${c.m}</div><div class="mut">How do you say it? (word or romanization)</div>${inp}`;
+ else b=`<div class="big">${c.w} ${sp(c.w,c.l)}</div><div class="mut">${c.p}</div>${inp}`;
+ view(`<h2>${Q.title} <small>${Q.i+1}/${Q.list.length}</small></h2><div class="card">${b}<div id="fb"></div></div>${back()}`);
+ if(AUTO&&m!=="r")say(c.w,c.l);const i=$("#in");if(i){i.focus();i.onkeydown=e=>{if(e.key==="Enter")sub()}}}
+function sub(){const c=Q.list[Q.i],v=$("#in").value,g=Q.mode==="r"?ok(v,c.w,.9)||ok(v,c.p):ok(v,c.m);fin(c,g,`${c.w} (${c.p}) = ${c.m}`)}
+function pick(k){const c=Q.list[Q.i];fin(c,Q.o[k]===c.m,c.m)}
+function fin(c,g,a){rec(c.id,g);if(g)Q.s++;if(Q.mode==="r"&&AUTO)say(c.w,c.l);document.querySelectorAll(".card button:not(.sp),#in").forEach(b=>b.disabled=true);$("#fb").innerHTML=`<p class="${g?"ok":"bad"}">${g?"✅ Correct!":"❌ "+a}</p><button onclick="Q.i++;ask()">Next</button>`}
+function end(){view(`<h2>Session finished</h2><div class="card"><div class="big">${Q.s}/${Q.list.length}</div><p>⭐ ${S.xp} XP · 🔥 ${S.streak}-day streak</p></div>${back()}`)}
+function mission(){const t=day(),a=shuf(cards("all"));run("f",[...a.filter(c=>S.cards[c.id]&&S.cards[c.id].due<=t),...a.filter(c=>!S.cards[c.id])].slice(0,10),"Daily mission")}
+function study(m){view(`<h2>${{f:"Foreign → English",r:"English → Foreign",c:"Multiple choice"}[m]}</h2><div class="card"><label>Language</label><select id="sl" onchange="cats()"><option value="all">All mixed</option>${LK.map(k=>`<option value="${k}">${D[k].n}</option>`).join("")}</select><label>Category</label><select id="sc"><option value="all">All</option></select><button onclick="run('${m}',cards($('#sl').value,$('#sc').value),'Study')">Start</button></div>${back()}`)}
+function cats(){const l=$("#sl").value;$("#sc").innerHTML=`<option value="all">All</option>`+(l==="all"?"":Object.keys(D[l].c).map(c=>`<option>${c}</option>`).join(""))}
+
+function talk(l){
+ if(!l)return view(`<h2>Conversation practice</h2><div class="menu">${langBtns("talk")}</div>${back()}`);
+ view(`<h2>${D[l].n}</h2><div class="menu">${Object.keys(D[l].d).map(t=>`<button onclick="play('${l}','${t}')">${t}</button>`).join("")}</div>${back()}`)}
+function play(l,t){const ls=D[l].d[t].split("\n").map(r=>r.split("|"));
+ view(`<h2>${t}</h2><div class="card">${ls.map(x=>`<p class="${x[0]==="B"?"you":""}"><b>${x[0]==="B"?"You":"They"}:</b> ${x[1]} ${sp(x[1],l)}<br><span class="mut">${x[2]} — ${x[3]}</span></p>`).join("")}</div><button onclick="rp0('${l}','${t}')">Start role-play</button>${back()}`)}
+let R;
+function rp0(l,t){const ls=D[l].d[t].split("\n").map(r=>r.split("|"));R={l,ls,k:ls.map((x,i)=>x[0]==="B"?i:-1).filter(i=>i>=0),n:0,s:0,pool:Object.entries(D[l].d).filter(([d])=>d!==t).flatMap(([,v])=>v.split("\n").map(r=>r.split("|")).filter(x=>x[0]==="B").map(x=>x[1]))};rp()}
+function rp(){
+ if(R.n>=R.k.length){S.xp+=R.s*15;save();return view(`<h2>Role-play done</h2><div class="card"><div class="big">${R.s}/${R.k.length}</div></div>${back()}`)}
+ const i=R.k[R.n],me=R.ls[i],prev=R.ls[i-1];R.o=shuf([me[1],...shuf(R.pool).slice(0,2)]);R.me=me;
+ view(`<h2>Role-play <small>${R.n+1}/${R.k.length}</small></h2><div class="card"><p><b>They say:</b> ${prev[1]} ${sp(prev[1],R.l)}<br><span class="mut">${prev[3]}</span></p><p>You want to say: <b>“${me[3]}”</b></p>${R.o.map((o,j)=>`<button class="ghost" onclick="rpk(${j})">${o}</button>`).join("")}<div id="fb"></div></div>${back()}`)}
+function rpk(j){const g=R.o[j]===R.me[1];if(g)R.s++;if(AUTO)say(R.me[1],R.l);document.querySelectorAll(".card button:not(.sp)").forEach(b=>b.disabled=true);$("#fb").innerHTML=`<p class="${g?"ok":"bad"}">${g?"✅ Perfect reply!":"❌ Better: "+R.me[1]+" ("+R.me[2]+")"}</p><button onclick="R.n++;rp()">Next</button>`}
+
+function routine(l){
+ if(!l)return view(`<h2>A day in…</h2><div class="menu">${langBtns("routine")}</div>${back()}`);
+ view(`<h2>A day in ${D[l].n}</h2><div class="card">${D[l].c["Daily Routine"].split("\n").map((r,i)=>{const[w,p,m]=r.split("|");return `<p><b>${TIMES[i]}</b> · ${w} ${sp(w,l)}<br><span class="mut">${p} — ${m}</span></p>`}).join("")}</div>${back()}`)}
+function stats(){
+ const all=cards("all"),seen=all.filter(c=>S.cards[c.id]),acc=seen.reduce((a,c)=>[a[0]+S.cards[c.id].c,a[1]+S.cards[c.id].s],[0,0]);
+ view(`<h2>📊 Stats</h2><div class="card"><p>⭐ ${S.xp} XP · 🔥 ${S.streak} day streak (best ${S.best})</p><p>Cards seen ${seen.length}/${all.length} · Accuracy ${acc[1]?Math.round(100*acc[0]/acc[1])+"%":"-"}</p>${LK.map(k=>{const l=cards(k),m=l.filter(c=>(S.cards[c.id]||{}).b>=4).length;return `<small>${D[k].n} · mastered ${m}/${l.length}</small><div class="bar"><i style="width:${100*m/l.length}%"></i></div>`}).join("<br>")}</div><button class="ghost" onclick="if(confirm('Reset all progress?')){S={...P0};save();home()}">Reset progress</button>${back()}`)}
+home();
+</script>
+</body>
+</html>
